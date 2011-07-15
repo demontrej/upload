@@ -35,7 +35,7 @@ foreach($linksimages as $sku => $link)
     }
     else
     {
-        echo $sku.'aún no esta dentro de la tienda</br>';
+        echo $sku.'aï¿½n no esta dentro de la tienda</br>';
     }
 }
 function verificaimagenvinculada($product_id)

@@ -1,50 +1,7 @@
 <?php
-///////////////////////////////////////////////////////////////////////////////
+
 ////////////////////////////////////////////////
-//introduce introduce los tier price en un array
-////////////////////////////////////////////////
-function tierprice_array($archivo)
-{
-    
-    $arrayaux=array();
-    $sw=false;
-    if (($handle = fopen($archivo, "r")) !== FALSE) { 
-    while (($data = fgetcsv($handle, 2400,";")) !== FALSE) { 
-        if($sw==true){
-        $arrayaux[]= array($data[0],$data[2],$data[7]);
-        }
-        $sw=true;
-    } 
-    fclose($handle);
-    }
-    echo 'archivo de precios multiples cargado...</br>';
-    return $arrayaux;
-}
-/////////////////////////////////////////////////////////////////
-//devuelve un array con los tier price para adicionarlo en un producto
-/////////////////////////////////////////////////////////////////
-function array_tierprice_product($arraytier,$sku)
-{
-    $tierprice=array();
-    $website_id=0;
-    $cust_group=1;
-    foreach($arraytier as $registro)
-    {
-        if ($sku==$registro[0])
-        {
-            $tierprice[]=array(
-                    'website_id'=>$website_id,
-                    'cust_group'=>$cust_group,
-                    'price_qty'=>$registro[1],
-                    'price'=>$registro[2]
-            );
-                
-        }
-    }
-    return $tierprice;
-}
-////////////////////////////////////////////////
-//CREA ARRAY DE PRECIOS
+//CREA ARRAY DE PRECIOS EN UN HASH
 ////////////////////////////////////////////////
 function arrayprecio($archivo)
 {
@@ -61,8 +18,7 @@ function arrayprecio($archivo)
     return $arrayaux;
 }
 //BUSCA PRECIO DE PRODUCTO EN ARRAY
-
-//
+//si el producto no tiene precio arrojamos 0 pero en el sta
 function product_price($sku, &$prices_array)
 {
     if (array_key_exists($sku, $prices_array)) {
@@ -214,7 +170,6 @@ foreach($listado_productos as $producto)
         if($preciomag!=$precio){$cambios[]='precio';}
         if($stock!=$producto[4]){$cambios[]='stock';}
         if($producto[5]!=key($categories[utf8_encode($producto[5])])){$cambios[]='categoria';}
-        //category_id(utf8_encode($producto[5]),$categories)
         //si tiene alg�n cambio actuliza
         if(count($cambios)>0){
             $productInfoData = $productomagento->getData();
