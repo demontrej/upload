@@ -100,6 +100,7 @@ function crea_categoria($name, $parent_id)
 function busca_categoria($name)// adicionar el parent id
 {
      $category = Mage::getModel('catalog/category')->loadByAttribute('name',$name);
+     
      if($category) 
      {
          echo "La categoria ".$category->getName()." existe! su id. es ".$category->getId()."</br>";
@@ -170,5 +171,6 @@ foreach($cat_product_count as $cat_1=>$catnivel_2)
 
 
 }
+
 
 ?>

@@ -78,8 +78,5 @@ foreach($productos_borrar as $sku)
         echo $sku.'-no existe el producto';
     }
 }
-
-
-
 ?>
 
