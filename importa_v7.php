@@ -83,133 +83,6 @@ function category_id($cat_name,$list_cat)
         return $list_cat['Default Category'];
     }
 }
-
-function actualiza_producto($id, $datos, $precio, $id_categoria){ 
-    $productomagento= Mage::getModel('catalog/product');
-    $productomagento->load($id);
-    $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productomagento)->getQty();
-    echo '</br>';
-    $cambios=array();
-    $productInfoData = $productomagento->getData();
-    if($productomagento['name']!=$datos[1])
-        {   echo 'nombre diferente</br>';
-            echo 'n: '.$datos[1].'- a: '.$productomagento['name'].'</br>';
-            $productInfoData['name']= $datos[1];
-            $cambios[]='nombre';
-        }
-    if($productomagento['description']!=$datos[2])
-        {
-            echo 'descripcion diferente';
-            echo 'n: '.$datos[2].'- a: '.$productomagento['description'].'</br>';
-            $productInfoData['description']= $datos[2];
-            $cambios[]='descripción';
-        }
-    if($productomagento['price']!=str_replace(',','.',$precio)){
-            echo 'precio diferente';
-            echo 'n: '.$precio.'- a: '.$productomagento['price'].'</br>';
-            $cambios[]='precio';
-            $productInfoData['price']= $precio;
-            if($precio==0)
-            {
-                $productInfoData['setStatus']=0; // disable
-            }
-            else
-            {
-                $productInfoData['setStatus']=1; // enable
-            }
-        }
-    if($stock!=$datos[11]){
-            echo 'stock diferente';
-            echo 'n: '.$datos[11].'- a: '.$stock.'</br>';
-            $cambios[]='precio';
-            $stockDatamagento = $productomagento->getStockData();
-            $stockDatamagento['qty'] = $datos[11];
-            $stockDatamagento['is_in_stock'] = 1;
-        }
-    $categoria=$productomagento->getCategoryIds();
-    if($categoria[0]!=$id_categoria){
-            echo 'categoria diferente';
-            echo 'n: '.$id_categoria.'- a: '.$categoria[0].'</br>';
-            $cambios[]='categoria';
-            $productomagento->setCategoryIds($id_categoria);
-    }
-    if($cambios)
-    {
-        $productomagento->setData($productInfoData);
-        $productomagento->setStockData($stockDatamagento);
-        try {
-            $productomagento->save();
-            echo  '- Actualizado! '. join(', ', $cambios).'</br>';
-        }
-            catch (Exception $ex) {
-            echo '<pre>'.$productomagento['sku'].$ex.'</pre>';
-        }
-    }
-    else
-    {
-        echo  '- sin cambios!</br>';
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-///////////////////////IMPORTA PRODUCTOS MAGENTO////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-echo 'estado de la memoria(inicio script): '.memory_get_usage() . '</br>';
-require 'D:\software\xampp\htdocs\magento\app\Mage.php';
-//require '../app/Mage.php';
-$app = Mage::app('default');
-//$app = Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
-//$listado_productos= crea_arrayaux('GM_ES_C_Product20110629.txt');
-//echo 'estado de la memoria(cargar los productos en array): '.memory_get_usage() . '</br>';
-$listado_precios= arrayprecio('GM_ES_C_Prices20110629.txt');
-echo 'estado de la memoria(cargar los precios): '.memory_get_usage() . '</br>';
-$categories = categorias_id();
-echo 'estado de la memoria(cargamos las categorias): '.memory_get_usage() . '</br>';
-
-// llamamos al modelo y crea un objeto para la actulización
-//$modelo_producto=Mage::getModel('catalog/product');
-//echo '<pre>';
-//print_r($categories);
-//echo '</pre>';
-$archivo='GM_ES_C_Product20110629.txt';
-$sw=false;
-$j=0;
-if (($handle = fopen($archivo, "r")) !== FALSE) { 
-    while (($data = fgetcsv($handle, 2400,";")) !== FALSE) { 
-        if($j==200){
-            break;
-        }
-        
-        if($sw==true){
-            
-        $data[2] = iconv('latin1', 'utf-8', $data[2]);
-        $data[19] = iconv('latin1', 'utf-8', $data[19]);
-        //print_r($data);
-        //echo 'estado de la memoria: '.memory_get_usage() . '</br>';
-        $j++;
-        echo $j.' - '.$data[0];
-        $product_id = Mage::getModel('catalog/product')->getIdBySku($data[0]);
-        if($product_id)
-        {
-            //echo "existe!!</br>";
-            //compara diferencias
-            
-            //actualiza_producto($modelo_producto,$product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
-            actualiza_producto($product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
-
-        }
-        else
-        {
-            //crear producto
-            //$j++;
-            //echo "no existe</br>";
-            crea_producto($data,$listado_precios[$data[0]],$categories[$data[19]]);
-        }    
-        }
-        $sw=true;      
-    } 
-    fclose($handle);
-}
 function crea_producto($datos,$precio,$categoria)
 {
         $producto_nuevo = Mage::getmodel('catalog/product');
@@ -251,6 +124,142 @@ function crea_producto($datos,$precio,$categoria)
             echo '<pre>'.$ex.'</pre>';
         } 
 }
+function actualiza_producto($id, $datos, $precio, $id_categoria){ 
+    $productomagento= Mage::getModel('catalog/product');
+    $productomagento->load($id);
+    $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productomagento)->getQty();
+    echo '</br>';
+    $cambios=array();
+    //$productInfoData = $productomagento->getData();
+    if($productomagento['name']!=$datos[1])
+        {   echo 'nombre diferente</br>';
+            echo 'n: '.$datos[1].'- a: '.$productomagento['name'].'</br>';
+            $productomagento->setName($datos[1]);
+            //$productInfoData['name']= $datos[1];
+            $cambios[]='nombre';
+        }
+    if($productomagento['description']!=$datos[2])
+        {
+            echo 'descripcion diferente';
+            echo 'n: '.$datos[2].'- a: '.$productomagento['description'].'</br>';
+            $productomagento->setDescription($datos[2]);
+            //$productInfoData['description']= $datos[2];
+            $cambios[]='descripción';
+        }
+    if($productomagento['price']!=str_replace(',','.',$precio)){
+            echo 'precio diferente';
+            echo 'n: '.$precio.'- a: '.$productomagento['price'].'</br>';
+            $cambios[]='precio';
+            $productomagento->setPrice($precio);
+            //$productInfoData['price']= $precio;
+            if($precio==0)
+            {
+                $productomagento->setStatus('0');
+                //$productInfoData['setStatus']=0; // disable
+            }
+            else
+            {
+                $productomagento->setStatus('1');
+                //$productInfoData['setStatus']=1; // enable
+            }
+        }
+    if($stock!=$datos[11]){
+            echo 'stock diferente';
+            echo 'n: '.$datos[11].'- a: '.$stock.'</br>';
+            $cambios[]='precio';
+            $stockDatamagento = $productomagento->getStockData();
+            $stockDatamagento['qty'] = $datos[11];
+            $stockDatamagento['is_in_stock'] = 1;
+        }
+    $categoria=$productomagento->getCategoryIds();
+    if($categoria[0]!=$id_categoria){
+            echo 'categoria diferente';
+            echo 'n: '.$id_categoria.'- a: '.$categoria[0].'</br>';
+            $cambios[]='categoria';
+            $productomagento->setCategoryIds($id_categoria);
+            //$productomagento->setCategoryIds('2');
+            echo 'hay cambios';
+                              
+    }
+    if($cambios)
+    {
+        //$productomagento->setData($productInfoData);
+        $productomagento->setStockData($stockDatamagento);
+        try {
+            $productomagento->save();
+            echo  '- Actualizado! '. join(', ', $cambios).'</br>';
+        }
+            catch (Exception $ex) {
+            echo '<pre>'.$productomagento['sku'].$ex.'</pre>';
+        }
+    }
+    else
+    {
+        echo  '- sin cambios!</br>';
+    }
+    unset($productomagento,$stock);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////IMPORTA PRODUCTOS MAGENTO////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+echo 'estado de la memoria(inicio script): '.memory_get_usage() . '</br>';
+//require 'D:\software\xampp\htdocs\magento\app\Mage.php';
+require '../app/Mage.php';
+//$app = Mage::app('default');
+$app = Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+//$listado_productos= crea_arrayaux('GM_ES_C_Product20110629.txt');
+//echo 'estado de la memoria(cargar los productos en array): '.memory_get_usage() . '</br>';
+$listado_precios= arrayprecio('GM_ES_C_Prices20110629.txt');
+echo 'estado de la memoria(cargar los precios): '.memory_get_usage() . '</br>';
+$categories = categorias_id();
+echo 'estado de la memoria(cargamos las categorias): '.memory_get_usage() . '</br>';
+
+// llamamos al modelo y crea un objeto para la actulización
+//$modelo_producto=Mage::getModel('catalog/product');
+//echo '<pre>';
+//print_r($categories);
+//echo '</pre>';
+$archivo='GM_ES_C_Product20110629.txt';
+$sw=false;
+$j=0;
+if (($handle = fopen($archivo, "r")) !== FALSE) { 
+    while (($data = fgetcsv($handle, 2400,";")) !== FALSE) { 
+//        if($j==100){
+//            break;
+//        }        
+        if($sw==true){
+            
+        $data[2] = iconv('latin1', 'utf-8', $data[2]);
+        $data[19] = iconv('latin1', 'utf-8', $data[19]);
+        //print_r($data);
+        //echo 'estado de la memoria: '.memory_get_usage() . '</br>';
+        $j++;
+        echo $j.' - '.$data[0];
+        $product_id = Mage::getModel('catalog/product')->getIdBySku($data[0]);
+        if($product_id)
+        {
+            //echo "existe!!</br>";
+            //compara diferencias
+            
+            //actualiza_producto($modelo_producto,$product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
+            actualiza_producto($product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
+
+        }
+        else
+        {
+            //crear producto
+            //$j++;
+            //echo "no existe</br>";
+            crea_producto($data,$listado_precios[$data[0]],$categories[$data[19]]);
+        }  
+        
+        }
+        $sw=true;      
+    } 
+    fclose($handle);
+}
+
 echo 'estado de la memoria(fin script): '.memory_get_usage() . '</br>';
 
 ?>

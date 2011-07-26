@@ -17,6 +17,7 @@
 cron.*
 *.rar
 *.ico
+*.csv
 index.*
 install.php
 LICENSE.*
