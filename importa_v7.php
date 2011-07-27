@@ -123,9 +123,10 @@ function crea_producto($datos,$precio,$categoria)
             catch (Exception $ex) {
             echo '<pre>'.$ex.'</pre>';
         } 
+        unset($producto_nuevo);
 }
 function actualiza_producto($id, $datos, $precio, $id_categoria){ 
-    $productomagento= Mage::getModel('catalog/product');
+    //$productomagento= Mage::getModel('catalog/product');
     $productomagento->load($id);
     $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productomagento)->getQty();
     echo '</br>';
@@ -186,7 +187,7 @@ function actualiza_producto($id, $datos, $precio, $id_categoria){
         //$productomagento->setData($productInfoData);
         $productomagento->setStockData($stockDatamagento);
         try {
-            $productomagento->save();
+            //$productomagento->save();
             echo  '- Actualizado! '. join(', ', $cambios).'</br>';
         }
             catch (Exception $ex) {
@@ -197,7 +198,29 @@ function actualiza_producto($id, $datos, $precio, $id_categoria){
     {
         echo  '- sin cambios!</br>';
     }
-    unset($productomagento,$stock);
+    unset($productomagento,$stock,$cambios,$stockDatamagento,$categoria,$id, $datos, $precio, $id_categoria);
+}
+function getcategoria_id($id)
+{
+    $db = Mage::getModel('core/resource')->getConnection('core_write');
+    //consulta para el servidor
+    $query="SELECT  `category_id` FROM  `macatalog_category_product` WHERE  `product_id` =".$id;
+    //consulta para el local
+    //$query="SELECT  `category_id` FROM  `catalog_category_product` WHERE  `product_id` =".$id;
+    $result = $db->query($query);
+
+    if($result) {
+        
+        $allcategorias = $result->fetchAll();
+        return $allcategorias[0]['category_id'];
+    }
+    else
+    {
+        echo 'no hay resultados';
+        return NULL;
+    }
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,34 +239,127 @@ $categories = categorias_id();
 echo 'estado de la memoria(cargamos las categorias): '.memory_get_usage() . '</br>';
 
 // llamamos al modelo y crea un objeto para la actulización
-//$modelo_producto=Mage::getModel('catalog/product');
+$productomagento=Mage::getModel('catalog/product');
+//print_r($categoria);
 //echo '<pre>';
-//print_r($categories);
+
 //echo '</pre>';
 $archivo='GM_ES_C_Product20110629.txt';
+
+
 $sw=false;
 $j=0;
 if (($handle = fopen($archivo, "r")) !== FALSE) { 
     while (($data = fgetcsv($handle, 2400,";")) !== FALSE) { 
-//        if($j==100){
+//        if($j==4000){
 //            break;
 //        }        
         if($sw==true){
-            
+        echo 'estado de la memoria(centro): '.memory_get_usage() . '</br>';
         $data[2] = iconv('latin1', 'utf-8', $data[2]);
         $data[19] = iconv('latin1', 'utf-8', $data[19]);
         //print_r($data);
         //echo 'estado de la memoria: '.memory_get_usage() . '</br>';
         $j++;
         echo $j.' - '.$data[0];
-        $product_id = Mage::getModel('catalog/product')->getIdBySku($data[0]);
+        //$product_id = Mage::getModel('catalog/product')->getIdBySku($data[0]);
+        $product_id = $productomagento->getIdBySku($data[0]);
+        
         if($product_id)
         {
             //echo "existe!!</br>";
             //compara diferencias
             
             //actualiza_producto($modelo_producto,$product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
-            actualiza_producto($product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
+            //actualiza_producto($product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
+            
+            //$precio=$listado_precios[$data[0]];
+            //$productomagento= Mage::getModel('catalog/product');
+            //$productomagento= Mage::getSingleton('catalog/product');
+            //$categoria=$productomagento->getCategoryIds($product_id);
+            $productomagento->load($product_id);
+            
+            $id_categoria=$categories[$data[19]];
+            $precio=$listado_precios[$data[0]];
+            $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productomagento)->getQty();
+            echo '</br>';
+            $cambios=array();
+            //$productInfoData = $productomagento->getData();
+            if($productomagento['name']!=$data[1])
+                {   echo 'nombre diferente</br>';
+                    echo 'n: '.$data[1].'- a: '.$productomagento['name'].'</br>';
+                    $productomagento->setName($data[1]);
+                    //$productInfoData['name']= $data[1];
+                    $cambios[]='nombre';
+                }
+            if($productomagento['description']!=$data[2])
+                {
+                    echo 'descripcion diferente';
+                    echo 'n: '.$data[2].'- a: '.$productomagento['description'].'</br>';
+                    $productomagento->setDescription($data[2]);
+                    //$productInfoData['description']= $data[2];
+                    $cambios[]='descripción';
+                }
+            if($productomagento['price']!=str_replace(',','.',$precio)){
+                    echo 'precio diferente';
+                    echo 'n: '.$precio.'- a: '.$productomagento['price'].'</br>';
+                    $cambios[]='precio';
+                    $productomagento->setPrice($precio);
+                    //$productInfoData['price']= $precio;
+                    if($precio==0)
+                    {
+                        $productomagento->setStatus('0');
+                        //$productInfoData['setStatus']=0; // disable
+                    }
+                    else
+                    {
+                        $productomagento->setStatus('1');
+                        //$productInfoData['setStatus']=1; // enable
+                    }
+                }
+            if($stock!=$data[11]){
+                    echo 'stock diferente';
+                    echo 'n: '.$data[11].'- a: '.$stock.'</br>';
+                    $cambios[]='stock';
+                    $stockDatamagento = $productomagento->getStockData();
+                    $stockDatamagento['qty'] = $data[11];
+                    $stockDatamagento['is_in_stock'] = 1;
+                    $productomagento->setStockData($stockDatamagento);
+                }
+            //$categoria=$productomagento->getCategoryIds($product_id);
+            
+//            echo ('<pre>');
+//            print_r($categoria);
+//            echo ('</pre>');
+            $cat_tienda=getcategoria_id($product_id);
+            if($cat_tienda !=$id_categoria){
+                    echo 'categoria diferente';
+                    echo 'n: '.$id_categoria.'- a: '.$cat_tienda.'</br>';
+                    $cambios[]='categoria';
+                    $productomagento->setCategoryIds($id_categoria);
+                    
+                    //$productomagento->setCategoryIds('2');
+                    echo 'hay cambios';
+
+            }
+            if($cambios)
+            {
+                //$productomagento->setData($productInfoData);
+                
+                try {
+                    $productomagento->save();
+                    echo  '- Actualizado! '. join(', ', $cambios).'</br>';
+                }
+                    catch (Exception $ex) {
+                    echo '<pre>'.$productomagento['sku'].$ex.'</pre>';
+                }
+            }            
+            else
+            {
+                echo  '- sin cambios!</br>';
+            }
+            //unset($productomagento,$stock,$cambios,$stockDatamagento,$categoria,$id, $precio, $id_categoria);
+            unset($listado_precios[$data[0]],$stock);
 
         }
         else
@@ -251,11 +367,14 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
             //crear producto
             //$j++;
             //echo "no existe</br>";
+            
             crea_producto($data,$listado_precios[$data[0]],$categories[$data[19]]);
+            unset($listado_precios[$data[0]]);
         }  
         
         }
         $sw=true;      
+        unset($data);
     } 
     fclose($handle);
 }

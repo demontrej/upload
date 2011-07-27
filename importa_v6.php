@@ -208,9 +208,9 @@ foreach($listado_productos as $producto)
         
         //verificamos si hay algun cambio
         $cambios=array();
-        if($productomagento['name']!=  utf8_encode($producto[3])) {$cambios[]='nombre';}
+        if($productomagento['name']!=  utf8_encode($producto[1])) {$cambios[]='nombre';}
         if($productomagento['description']!=  utf8_encode($producto[2])){$cambios[]='decripci�n';}
-        if($productomagento['short_description']!=  utf8_encode($producto[1])){$cambios[]='decripci�n corta';}
+        //if($productomagento['short_description']!=  utf8_encode($producto[1])){$cambios[]='decripci�n corta';}
         if($preciomag!=$precio){$cambios[]='precio';}
         if($stock!=$producto[4]){$cambios[]='stock';}
         if($producto[5]!=key($categories[utf8_encode($producto[5])])){$cambios[]='categoria';}
@@ -218,9 +218,9 @@ foreach($listado_productos as $producto)
         //si tiene alg�n cambio actuliza
         if(count($cambios)>0){
             $productInfoData = $productomagento->getData();
-            $productInfoData['name']= utf8_encode($producto[3]);
+            $productInfoData['name']= utf8_encode($producto[1]);
             $productInfoData['description']= utf8_encode($producto[2]);
-            $productInfoData['short_description']= utf8_encode($producto[1]);
+            //$productInfoData['short_description']= utf8_encode($producto[1]);
             $productInfoData['price']= $precio;
             if($precio==0)
             {
