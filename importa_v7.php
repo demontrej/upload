@@ -125,88 +125,14 @@ function crea_producto($datos,$precio,$categoria)
         } 
         unset($producto_nuevo);
 }
-function actualiza_producto($id, $datos, $precio, $id_categoria){ 
-    //$productomagento= Mage::getModel('catalog/product');
-    $productomagento->load($id);
-    $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productomagento)->getQty();
-    echo '</br>';
-    $cambios=array();
-    //$productInfoData = $productomagento->getData();
-    if($productomagento['name']!=$datos[1])
-        {   echo 'nombre diferente</br>';
-            echo 'n: '.$datos[1].'- a: '.$productomagento['name'].'</br>';
-            $productomagento->setName($datos[1]);
-            //$productInfoData['name']= $datos[1];
-            $cambios[]='nombre';
-        }
-    if($productomagento['description']!=$datos[2])
-        {
-            echo 'descripcion diferente';
-            echo 'n: '.$datos[2].'- a: '.$productomagento['description'].'</br>';
-            $productomagento->setDescription($datos[2]);
-            //$productInfoData['description']= $datos[2];
-            $cambios[]='descripción';
-        }
-    if($productomagento['price']!=str_replace(',','.',$precio)){
-            echo 'precio diferente';
-            echo 'n: '.$precio.'- a: '.$productomagento['price'].'</br>';
-            $cambios[]='precio';
-            $productomagento->setPrice($precio);
-            //$productInfoData['price']= $precio;
-            if($precio==0)
-            {
-                $productomagento->setStatus('0');
-                //$productInfoData['setStatus']=0; // disable
-            }
-            else
-            {
-                $productomagento->setStatus('1');
-                //$productInfoData['setStatus']=1; // enable
-            }
-        }
-    if($stock!=$datos[11]){
-            echo 'stock diferente';
-            echo 'n: '.$datos[11].'- a: '.$stock.'</br>';
-            $cambios[]='precio';
-            $stockDatamagento = $productomagento->getStockData();
-            $stockDatamagento['qty'] = $datos[11];
-            $stockDatamagento['is_in_stock'] = 1;
-        }
-    $categoria=$productomagento->getCategoryIds();
-    if($categoria[0]!=$id_categoria){
-            echo 'categoria diferente';
-            echo 'n: '.$id_categoria.'- a: '.$categoria[0].'</br>';
-            $cambios[]='categoria';
-            $productomagento->setCategoryIds($id_categoria);
-            //$productomagento->setCategoryIds('2');
-            echo 'hay cambios';
-                              
-    }
-    if($cambios)
-    {
-        //$productomagento->setData($productInfoData);
-        $productomagento->setStockData($stockDatamagento);
-        try {
-            //$productomagento->save();
-            echo  '- Actualizado! '. join(', ', $cambios).'</br>';
-        }
-            catch (Exception $ex) {
-            echo '<pre>'.$productomagento['sku'].$ex.'</pre>';
-        }
-    }
-    else
-    {
-        echo  '- sin cambios!</br>';
-    }
-    unset($productomagento,$stock,$cambios,$stockDatamagento,$categoria,$id, $datos, $precio, $id_categoria);
-}
+
 function getcategoria_id($id)
 {
     $db = Mage::getModel('core/resource')->getConnection('core_write');
     //consulta para el servidor
     $query="SELECT  `category_id` FROM  `macatalog_category_product` WHERE  `product_id` =".$id;
     //consulta para el local
-    //$query="SELECT  `category_id` FROM  `catalog_category_product` WHERE  `product_id` =".$id;
+  //  $query="SELECT  `category_id` FROM  `catalog_category_product` WHERE  `product_id` =".$id;
     $result = $db->query($query);
 
     if($result) {
@@ -237,13 +163,9 @@ $listado_precios= arrayprecio('GM_ES_C_Prices20110629.txt');
 echo 'estado de la memoria(cargar los precios): '.memory_get_usage() . '</br>';
 $categories = categorias_id();
 echo 'estado de la memoria(cargamos las categorias): '.memory_get_usage() . '</br>';
-
 // llamamos al modelo y crea un objeto para la actulización
 $productomagento=Mage::getModel('catalog/product');
-//print_r($categoria);
-//echo '<pre>';
 
-//echo '</pre>';
 $archivo='GM_ES_C_Product20110629.txt';
 
 
@@ -267,64 +189,44 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
         
         if($product_id)
         {
-            //echo "existe!!</br>";
-            //compara diferencias
             
-            //actualiza_producto($modelo_producto,$product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
-            //actualiza_producto($product_id,$data,$listado_precios[$data[0]],$categories[$data[19]]);
-            
-            //$precio=$listado_precios[$data[0]];
-            //$productomagento= Mage::getModel('catalog/product');
-            //$productomagento= Mage::getSingleton('catalog/product');
-            //$categoria=$productomagento->getCategoryIds($product_id);
             $productomagento->load($product_id);
             
             $id_categoria=$categories[$data[19]];
             $precio=$listado_precios[$data[0]];
             $stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productomagento)->getQty();
             echo '</br>';
+//            $cambios['nombre']=false;
+//            $cambios['descripcion']=false;
+//            $cambios['precio']=false;
+//            $cambios['stock']=false;
+//            $cambios['categoria']=false;
+//           
             $cambios=array();
             //$productInfoData = $productomagento->getData();
             if($productomagento['name']!=$data[1])
-                {   echo 'nombre diferente</br>';
+                {   echo 'nombre2 diferente</br>';
                     echo 'n: '.$data[1].'- a: '.$productomagento['name'].'</br>';
-                    $productomagento->setName($data[1]);
                     //$productInfoData['name']= $data[1];
-                    $cambios[]='nombre';
+                    $cambios['nombre']='nombre';
                 }
             if($productomagento['description']!=$data[2])
                 {
                     echo 'descripcion diferente';
                     echo 'n: '.$data[2].'- a: '.$productomagento['description'].'</br>';
-                    $productomagento->setDescription($data[2]);
+                    $cambios['description']='descripcion';
                     //$productInfoData['description']= $data[2];
-                    $cambios[]='descripción';
                 }
             if($productomagento['price']!=str_replace(',','.',$precio)){
                     echo 'precio diferente';
                     echo 'n: '.$precio.'- a: '.$productomagento['price'].'</br>';
-                    $cambios[]='precio';
-                    $productomagento->setPrice($precio);
-                    //$productInfoData['price']= $precio;
-                    if($precio==0)
-                    {
-                        $productomagento->setStatus('0');
-                        //$productInfoData['setStatus']=0; // disable
-                    }
-                    else
-                    {
-                        $productomagento->setStatus('1');
-                        //$productInfoData['setStatus']=1; // enable
-                    }
+                    $cambios['precio']='precio';
                 }
             if($stock!=$data[11]){
                     echo 'stock diferente';
                     echo 'n: '.$data[11].'- a: '.$stock.'</br>';
-                    $cambios[]='stock';
-                    $stockDatamagento = $productomagento->getStockData();
-                    $stockDatamagento['qty'] = $data[11];
-                    $stockDatamagento['is_in_stock'] = 1;
-                    $productomagento->setStockData($stockDatamagento);
+                    $cambios['stock']='stock';
+                    
                 }
             //$categoria=$productomagento->getCategoryIds($product_id);
             
@@ -336,8 +238,6 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
                     echo 'categoria diferente';
                     echo 'n: '.$id_categoria.'- a: '.$cat_tienda.'</br>';
                     $cambios[]='categoria';
-                    $productomagento->setCategoryIds($id_categoria);
-                    
                     //$productomagento->setCategoryIds('2');
                     echo 'hay cambios';
 
@@ -345,10 +245,31 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
             if($cambios)
             {
                 //$productomagento->setData($productInfoData);
+                $productoactualizar=Mage::getModel('catalog/product')->load($product_id);
+                $productoactualizar->setName($data[1]);
+                $productoactualizar->setDescription($data[2]);
+                $productoactualizar->setPrice($precio);
+                //$productInfoData['price']= $precio;
+                    if($precio==0)
+                    {
+                        $productoactualizar->setStatus('0');
+                        //$productInfoData['setStatus']=0; // disable
+                    }
+                    else
+                    {
+                        $productoactualizar->setStatus('1');
+                        //$productInfoData['setStatus']=1; // enable
+                    }
+                $stockDatamagento = $productoactualizar->getStockData();
+                $stockDatamagento['qty'] = $data[11];
+                $stockDatamagento['is_in_stock'] = 1;
+                $productoactualizar->setStockData($stockDatamagento);
+                $productoactualizar->setCategoryIds($id_categoria);
                 
                 try {
-                    $productomagento->save();
+                    $productoactualizar->save();
                     echo  '- Actualizado! '. join(', ', $cambios).'</br>';
+                    unset($productoactualizar);
                 }
                     catch (Exception $ex) {
                     echo '<pre>'.$productomagento['sku'].$ex.'</pre>';
