@@ -125,13 +125,13 @@ function busca_o_crea_categoria($name,$parent_id)
         return crea_categoria($name, $parent_id);       
     }
 }
-//require_once('D:\software\xampp\htdocs\magento\app\Mage.php');
+require_once('D:\software\xampp\htdocs\magento\app\Mage.php');
 // para el servidor
-require '../app/Mage.php';
+//require '../app/Mage.php';
 //$app = Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
 $app = Mage::app('default');
 //recore las categoria las crea y busca nuevas categoria
-$cat_product_count=array_categorias('GM_ES_C_Product20110629.txt');
+$cat_product_count=array_categorias('GM_ES_C_Product20110726.txt');
 
 echo '<pre>';
 print_r($cat_product_count);

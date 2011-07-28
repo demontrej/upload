@@ -44,16 +44,16 @@ function crea_arrayauxantiguo($archivo)
     echo 'archivo de productos cargado...</br>';
     return $arrayaux;
 }
-$archivo_nuevo="GM_ES_C_Product20110723.txt";
-$archivo_antiguo="GM_ES_C_Product20110629.txt";
+$archivo_nuevo="GM_ES_C_Product20110726.txt";
+$archivo_antiguo="GM_ES_C_Product20110331.txt";
 $arrayantiguo=crea_arrayauxantiguo($archivo_antiguo);
 $nuevos=0;
 $actualizar=0;
 $total=0;
 $sw=false;
 $total_antiguo=count($arrayantiguo);
-$prices_antiguo=arrayprecio('GM_ES_C_Prices20110629.txt');
-$prices_nuevo=arrayprecio('GM_ES_C_Prices20110723.txt');
+$prices_antiguo=arrayprecio('GM_ES_C_Prices20110331.txt');
+$prices_nuevo=arrayprecio('GM_ES_C_Prices20110726.txt');
 $total_nuevo=0;
 echo 'estado de la memoria(inicio): '.memory_get_usage() . '</br>';
 if (($handle = fopen($archivo_nuevo, "r")) !== FALSE) { 

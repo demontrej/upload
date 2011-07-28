@@ -38,16 +38,17 @@ function comparadiferencias($tiers_olds, $tiers_news)
     return $tiers_news;
 }
 
-require 'D:\software\xampp\htdocs\magento\app\Mage.php';
-//require '../app/Mage.php';
+//require 'D:\software\xampp\htdocs\magento\app\Mage.php';
+require '../app/Mage.php';
 //$app = Mage::app('default');
 $app = Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
-$tierpricesnews=tierprice_array('GM_ES_C_prices_QB20110331.txt');
+$tierpricesnews=tierprice_array('GM_ES_C_prices_QB20110726.txt');
 $product=Mage::getModel('catalog/product');
 foreach($tierpricesnews as $sku=>$tierpricenew)
 {
     echo 'estado de la memoria: '.memory_get_usage() . '</br>';
     $productid=Mage::getModel('catalog/product')->getIdBySku($sku);
+    if($productid){
     $product->load($productid);
     $tierpricesolds=$product->tier_price;
     $tiersadd=comparadiferencias($tierpricesolds, $tierpricenew);
@@ -68,6 +69,11 @@ foreach($tierpricesnews as $sku=>$tierpricenew)
     else
     {
         echo $sku.' - no existe ningun cambio</br>';
+    }
+    }
+    else
+    {
+        echo $sku.' - aún no existe el producto</br>';
     }
 }
 

@@ -23,5 +23,8 @@ install.php
 LICENSE.*
 pear
 php.ini.sample
+*.jpg
+*.gif
+*.png
 
 /downloader/pearlib/php/.channels/

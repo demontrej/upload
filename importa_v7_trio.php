@@ -130,9 +130,9 @@ function getcategoria_id($id)
 {
     $db = Mage::getModel('core/resource')->getConnection('core_write');
     //consulta para el servidor
-    //$query="SELECT  `category_id` FROM  `macatalog_category_product` WHERE  `product_id` =".$id;
+    $query="SELECT  `category_id` FROM  `macatalog_category_product` WHERE  `product_id` =".$id;
     //consulta para el local
-    $query="SELECT  `category_id` FROM  `catalog_category_product` WHERE  `product_id` =".$id;
+    //$query="SELECT  `category_id` FROM  `catalog_category_product` WHERE  `product_id` =".$id;
     $result = $db->query($query);
 
     if($result) {
@@ -153,8 +153,8 @@ function getcategoria_id($id)
 ///////////////////////IMPORTA PRODUCTOS MAGENTO////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 echo 'estado de la memoria(inicio script): '.memory_get_usage() . '</br>';
-require 'D:\software\xampp\htdocs\magento\app\Mage.php';
-//require '../app/Mage.php';
+//require 'D:\software\xampp\htdocs\magento\app\Mage.php';
+require '../app/Mage.php';
 //$app = Mage::app('default');
 $app = Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
 //$listado_productos= crea_arrayaux('GM_ES_C_Product20110629.txt');
@@ -172,9 +172,8 @@ $sw=false;
 $j=0;
 if (($handle = fopen($archivo, "r")) !== FALSE) { 
     while (($data = fgetcsv($handle, 2400,";")) !== FALSE) { 
-        if($j==5){
-            break;
-        }        
+        
+        
         if($sw==true){
         echo 'estado de la memoria(centro): '.memory_get_usage() . '</br>';
         $data[2] = iconv('latin1', 'utf-8', $data[2]);
@@ -184,6 +183,7 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
         $j++;
         echo $j.' - '.$data[0];
         //$product_id = Mage::getModel('catalog/product')->getIdBySku($data[0]);
+        if($j>17000){
         $product_id = $productomagento->getIdBySku($data[0]);
         
         if($product_id)
@@ -286,7 +286,11 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
             crea_producto($data,$listado_precios[$data[0]],$categories[$data[19]]);
             unset($listado_precios[$data[0]]);
         }  
-        
+        }
+        else
+        {
+            echo '- se procesa en el primer script/n';
+        }
         }
         $sw=true;      
         unset($data);

@@ -42,11 +42,23 @@ function verificaimagenvinculada($product_id)
 {
     $db = Mage::getModel('core/resource')->getConnection('core_write');
     //consulta para el local
-    $query="SELECT `value_id` FROM `catalog_product_entity_media_gallery` WHERE `entity_id` =".$product_id;
+    $query="SELECT `value_id`,`value`  FROM `catalog_product_entity_media_gallery` WHERE `entity_id` =".$product_id;
     $result = $db->query($query);
     $vinculacion = $result->fetchAll();
+    //print_r($vinculacion);
     if($vinculacion){
-        return true;
+        $direcion_imagen = Mage::getBaseDir().'/media/catalog/product'.$vinculacion[0]['value'];
+        if(file_exists($direcion_imagen))
+        { 
+            echo 'existe el maldito!!</br>';
+            return true;
+        }
+        else
+        {
+            echo 'NO existe el maldito!!</br>';
+            return false;
+        }
+        
     }
     else{
         return false;
