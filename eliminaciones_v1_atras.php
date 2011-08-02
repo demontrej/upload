@@ -26,9 +26,9 @@ function allsku_bd()
 {
     $db = Mage::getModel('core/resource')->getConnection('core_write');
     //consulta para el local
-    $result = $db->query("SELECT  `sku` FROM  `catalog_product_entity` ");
+    //$result = $db->query("SELECT  `sku` FROM  `catalog_product_entity` ");
     //consulta para la tienda
-    //$result = $db->query("SELECT  `sku` FROM  `macatalog_product_entity` ");
+    $result = $db->query("SELECT  `sku` FROM  `macatalog_product_entity` ");
 
     if($result) {
         

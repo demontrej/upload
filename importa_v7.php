@@ -92,6 +92,7 @@ function crea_producto($datos,$precio,$categoria)
         $producto_nuevo->setDescription($datos[2]);
         //$producto_nuevo->setShortDescription(utf8_encode($producto[1]));
         $producto_nuevo->setAttributeSetId(4);
+        $producto_nuevo->setTaxClassId(0);
         $producto_nuevo->setTypeId('simple');
         $producto_nuevo->setWeight($datos[13]);
         $producto_nuevo->setVisibility(4); // catalog, search
@@ -163,21 +164,22 @@ $listado_precios= arrayprecio('GM_ES_C_Prices20110726.txt');
 echo 'estado de la memoria(cargar los precios): '.memory_get_usage() . '</br>';
 $categories = categorias_id();
 echo 'estado de la memoria(cargamos las categorias): '.memory_get_usage() . '</br>';
-// llamamos al modelo y crea un objeto para la actulización
+// llamamos al modelo y crea un objeto para la actulizaciÃ³n
 $productomagento=Mage::getModel('catalog/product');
 $archivo='GM_ES_C_Product20110726.txt';
 
-
+$numerocambios=0;
 $sw=false;
 $j=0;
 if (($handle = fopen($archivo, "r")) !== FALSE) { 
     while (($data = fgetcsv($handle, 2400,";")) !== FALSE) { 
-        if($j==5){
+        if($j==1000){
             break;
         }        
         if($sw==true){
         echo 'estado de la memoria(centro): '.memory_get_usage() . '</br>';
         $data[2] = iconv('latin1', 'utf-8', $data[2]);
+        $data[5] = iconv('latin1', 'utf-8', $data[5]);
         $data[19] = iconv('latin1', 'utf-8', $data[19]);
         //print_r($data);
         //echo 'estado de la memoria: '.memory_get_usage() . '</br>';
@@ -189,7 +191,8 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
         if($product_id)
         {
             
-            $productomagento->load($product_id);
+            
+	     $productomagento->load($product_id);
             
             $id_categoria=$categories[$data[19]];
             $precio=$listado_precios[$data[0]];
@@ -204,9 +207,9 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
 //           
             $cambios=array();
             //$productInfoData = $productomagento->getData();
-            if($productomagento['name']!=$data[1])
+            if($productomagento['name']!=$data[5].' '.$data[1])
                 {   echo 'nombre diferente</br>';
-                    echo 'n: '.$data[1].'- a: '.$productomagento['name'].'</br>';
+                    echo 'n: '.$data[5].' '.$data[1].'- a: '.$productomagento['name'].'</br>';
                     //$productInfoData['name']= $data[1];
                     $cambios['nombre']='nombre';
                 }
@@ -234,19 +237,25 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
             if($cat_tienda !=$id_categoria){
                     echo 'categoria diferente';
                     echo 'n: '.$id_categoria.'- a: '.$cat_tienda.'</br>';
-                    $cambios['categoria']='categoria';
+                    $cambios[]='categoria';
                     //$productomagento->setCategoryIds('2');
                     echo 'hay cambios';
 
             }
+	     //$cambios= 'algo';
             if($cambios)
             {
-                print_r($cambios);
+                $numerocambios++;
                 //$productomagento->setData($productInfoData);
                 $productoactualizar=Mage::getModel('catalog/product')->load($product_id);
-                $productoactualizar->setName($data[1]);
+                $productoactualizar->setName($data[5].' '.$data[1]);
                 $productoactualizar->setDescription($data[2]);
                 $productoactualizar->setPrice($precio);
+                $productoactualizar->setShortDescription($data[1]);
+                $productoactualizar->setTaxClassId(0);
+                $productoactualizar->setWeight($data[13]);
+
+
                 //$productInfoData['price']= $precio;
                     if($precio==0)
                     {
@@ -278,6 +287,7 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
                 echo  '- sin cambios!</br>';
             }
             //unset($productomagento,$stock,$cambios,$stockDatamagento,$categoria,$id, $precio, $id_categoria);
+	     unset($productoactualizar,$$stockDatamagento);
             unset($listado_precios[$data[0]],$stock);
 
         }
@@ -295,5 +305,6 @@ if (($handle = fopen($archivo, "r")) !== FALSE) {
 }
 
 echo 'estado de la memoria(fin script): '.memory_get_usage() . '</br>';
+echo 'cambios = '.$numerocambios;
 
 ?>

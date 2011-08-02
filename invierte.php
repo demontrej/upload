@@ -1,14 +1,6 @@
 <?php
-$path='D:\\software\\xampp\\htdocs\\magento\\';
-$directorio=dir($path);
-echo "Directorio ".$path.":<br><br>";
-$array=array();
-while ($archivo = $directorio->read())
-{
-    $array[] = $archivo."<br>";
-}
-$directorio->close();
-sort($array);
-print_r($array);
+echo base64_decode('a2baaf0f83b59aac824aa705d86cd550').'</br>';
+echo base64_encode('a2baaf0f83b59aac824aa705d86cd550').'</br>'; 
+echo MD5('a2baaf0f83b59aac824aa705d86cd550'); 
 
 ?>
